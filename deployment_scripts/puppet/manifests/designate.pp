@@ -50,6 +50,8 @@ if $designate_hash['metadata']['enabled'] {
 
   class { 'designate::agent': }
 
+  class { 'designate::backend::bind9': }
+
   class { 'designate::db':
     database_connection => $database_connection,
   }
