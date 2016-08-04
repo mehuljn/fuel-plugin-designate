@@ -17,11 +17,13 @@ Changes to Fuel Designate Plugin for MOS 8.0
 6. Add theforeman-dns to puppet modules on fuel master
 7. Add manifests for Pool Manager and mDNS (missing in the original mos 7.0 plugin)
 8. Removed pre_build_hook as there are changes in puppet-designate modules as well which are not in github
+9. Added feature to select "bind9" or "powerdns" backend to enviornment
 
-Additional Verify for PowerDNS
+Additional Verify for PowerDNS(WIP)
 
 1. Add powerdns in the repo
 2. Add powerdns puppet module 
+3. Changes to manifests for powedns as per heira (WIP)
 
 Integrate Designate Dashboard by Manually Installing on all Controllers
 https://github.com/openstack/designate-dashboard/tree/stable/liberty
