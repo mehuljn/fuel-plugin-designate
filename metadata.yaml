@@ -11,8 +11,7 @@ fuel_version: ['8.0']
 # Specify license of your plugin
 licenses: ['Apache License Version 2.0']
 # Specify author or company name
-authors: ['Venkata Jonnalagadda']
-# Mehul Jani changes for MOS 8.0
+authors: ['Venkata Jonnalagadda @Original Author', 'Mehul Jani']
 # A link to the plugin's page
 homepage: 'https://github.com/openstack/fuel-plugin-designate'
 # Specify a group which your plugin implements, possible options:

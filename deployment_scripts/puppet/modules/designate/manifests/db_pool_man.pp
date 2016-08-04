@@ -13,8 +13,8 @@
 #  [*sync_db*]
 #    Enable dbsync.
 #
-class designate::db (
-  $database_connection = 'mysql://designate:designate@localhost/designate',
+class designate::db_pool_man (
+  $database_connection = 'mysql://designate:designate@localhost/designate_pool_mananger',
   $sync_db             = true,
 ) {
 
@@ -31,11 +31,12 @@ class designate::db (
   }
 
   designate_config {
-    'storage:sqlalchemy/connection': value => $database_connection, secret => true;
+#    'storage:sqlalchemy/connection': value => $database_connection, secret => true;
+    'pool_manager_cache:sqlalchemy/connection': value => $database_connection, secret => true;
   }
 
   if $sync_db {
-    include ::designate::db::sync
+     include ::designate::db::sync_poolman
   }
 
 }

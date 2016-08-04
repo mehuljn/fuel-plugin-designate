@@ -43,6 +43,13 @@ class designate::backend::bind9 (
     require => Class['::designate'],
   }
 
+  file_line {'recursion no':
+    ensure  => present,
+    path    => "${::dns::params::namedconf_path}.options",
+    line    => 'recursion no;',
+    require => Class['::designate'],
+  }
+
   Class['::dns'] -> User['designate']
   User<| title == 'designate' |> {
     groups +> $::dns::params::group,

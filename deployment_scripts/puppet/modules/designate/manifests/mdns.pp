@@ -26,31 +26,31 @@
 #  else in the config.
 #  Defaults to undef
 #
-class designate::sink (
+class designate::mdns (
   $package_ensure                = present,
-  $sink_package_name             = undef,
+  $mdns_package_name             = undef,
   $enabled                       = true,
   $service_ensure                = 'running',
   $enabled_notification_handlers = undef,
 ) inherits designate {
   include ::designate::params
 
-  designate::generic_service { 'sink':
+  designate::generic_service { 'mdns':
     enabled        => $enabled,
     manage_service => $service_ensure,
     ensure_package => $package_ensure,
-    package_name   => pick($sink_package_name, $::designate::params::sink_package_name),
-    service_name   => $::designate::params::sink_service_name,
+    package_name   => pick($mdns_package_name, $::designate::params::mdns_package_name),
+    service_name   => $::designate::params::mdns_service_name,
   }
 
-  if $enabled_notification_handlers {
-    designate_config {
-      'service:sink/enabled_notification_handlers':  value => join($enabled_notification_handlers,',')
-    }
-  } else {
-    designate_config {
-      'service:sink/enabled_notification_handlers':  ensure => absent
-    }
-  }
+#  if $enabled_notification_handlers {
+#    designate_config {
+#      'service:sink/enabled_notification_handlers':  value => join($enabled_notification_handlers,',')
+#    }
+#  } else {
+#    designate_config {
+#      'service:sink/enabled_notification_handlers':  ensure => absent
+#    }
+#  }
 
 }

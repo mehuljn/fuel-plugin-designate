@@ -5,58 +5,12 @@ describe 'basic designate' do
   context 'default parameters' do
 
     it 'should work with no errors' do
-      ppp= <<-EOS
-      case $::osfamily {
-        'Debian': {
-          Exec { logoutput => 'on_failure' }
-          package { ['debconf-utils','debconf']: ensure => installed, } ->
-          exec { 'fix_empty_rabbit_password':
-            command  => '/bin/echo "designate-common designate/rabbit_password password password" | /usr/bin/debconf-set-selections',
-            unless   => '/usr/bin/debconf-get-selections | grep "designate/rabbit_password"',
-          }
-          exec { 'fix_empty_keystone_password':
-            command  => '/bin/echo "designate-common designate/admin-password password password" | /usr/bin/debconf-set-selections',
-            unless   => '/usr/bin/debconf-get-selections | grep "designate/admin-password"',
-          }
-        }
-      }
-      EOS
       pp= <<-EOS
-      Exec { logoutput => 'on_failure' }
-
-      # Common resources
-      case $::osfamily {
-        'Debian': {
-          include ::apt
-          class { '::openstack_extras::repo::debian::ubuntu':
-            release         => 'kilo',
-            package_require => true,
-          }
-          $package_provider = 'apt'
-        }
-        'RedHat': {
-          class { '::openstack_extras::repo::redhat::redhat':
-            release => 'kilo',
-          }
-          package { 'openstack-selinux': ensure => 'latest' }
-          $package_provider = 'yum'
-        }
-        default: {
-          fail("Unsupported osfamily (${::osfamily})")
-        }
-      }
-
-      class { '::mysql::server': }
-
-      class { '::rabbitmq':
-        delete_guest_user => true,
-        package_provider  => $package_provider,
-      }
-
-      rabbitmq_vhost { '/':
-        provider => 'rabbitmqctl',
-        require  => Class['rabbitmq'],
-      }
+      include ::openstack_integration
+      include ::openstack_integration::repos
+      include ::openstack_integration::rabbitmq
+      include ::openstack_integration::mysql
+      include ::openstack_integration::keystone
 
       rabbitmq_user { 'designate':
         admin    => true,
@@ -73,26 +27,6 @@ describe 'basic designate' do
         require              => Class['rabbitmq'],
       }
 
-      # Keystone resources, needed by Designate to run
-      class { '::keystone::db::mysql':
-        password => 'keystone',
-      }
-      class { '::keystone':
-        verbose             => true,
-        debug               => true,
-        database_connection => 'mysql://keystone:keystone@127.0.0.1/keystone',
-        admin_token         => 'admin_token',
-        enabled             => true,
-      }
-      class { '::keystone::roles::admin':
-        email    => 'test@example.tld',
-        password => 'a_big_secret',
-      }
-      class { '::keystone::endpoint':
-        public_url => "https://${::fqdn}:5000/",
-        admin_url  => "https://${::fqdn}:35357/",
-      }
-
       case $::osfamily {
         'Debian': {
           # Designate resources
@@ -106,6 +40,8 @@ describe 'basic designate' do
             rabbit_userid       => 'designate',
             rabbit_password     => 'an_even_bigger_secret',
             rabbit_host         => '127.0.0.1',
+            debug               => true,
+            verbose             => true,
           }
           class { '::designate::api':
             enabled           => true,
@@ -129,9 +65,6 @@ describe 'basic designate' do
       }
       EOS
 
-      # TODO : A fix on inifile must be filed, if the value is an empty string, the inifile provider
-      # configure the value with a newline.https://paste.debian.net/238471/
-      apply_manifest(ppp, :catch_failures => true)
       # Run it once, idempotency does not work
       # this is what we have each time we run puppet after first time:
       # http://paste.openstack.org/show/2ebHALkNguNsE0804Oev/

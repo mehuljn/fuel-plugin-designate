@@ -1,10 +1,29 @@
 # These tasks will be merged into deployment graph. Here you
 # can specify new tasks for any roles, even built-in ones.
 
+
+- id: primary-designate-node
+  type: group
+  role: [primary-designate-node]
+  tasks:
+    - fuel_pkgs
+    - hiera
+    - globals
+    - logging
+    - tools
+    - netconfig
+    - hosts
+    - firewall
+  required_for: [deploy_end]
+  requires: [primary-controller]
+  parameters:
+    strategy:
+      type: one_by_one
+
 - id: designate
   type: group
   role: [designate]
-  requires: [deploy_start]
+  requires: [primary-designate-node]
   required_for: [deploy_end]
   tasks: 
     - fuel_pkgs
@@ -22,7 +41,7 @@
 
 - id: designate-repo
   type: puppet
-  groups: ['primary-controller','controller']
+  groups: ['primary-controller', 'controller','primary-designate-node','designate']
   required_for: [task-designate, deploy_end]
   requires: [designate-haproxy]
   parameters:
@@ -34,7 +53,7 @@
   type: puppet
   groups: ['primary-controller', 'controller']
   required_for: [task-designate, deploy_end]
-  requires: [deploy_start, cluster-haproxy]
+  requires: [deploy_start, primary-cluster-haproxy, cluster-haproxy]
   parameters:
     puppet_manifest: puppet/manifests/haproxy.pp
     puppet_modules: puppet/modules:/etc/puppet/modules
@@ -50,6 +69,16 @@
     puppet_modules: puppet/modules:/etc/puppet/modules
     timeout: 1800
 
+- id: task-designate-db-pool-man
+  type: puppet
+  groups: ['primary-controller', 'controller']
+  required_for: [task-designate]
+  requires: [primary-database, database, task-designate-db]
+  parameters:
+    puppet_manifest: puppet/manifests/db_poolman.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 1800
+
 - id: designate-keystone
   type: puppet
   groups: ['primary-controller', 'controller']
@@ -62,9 +91,9 @@
 
 - id: task-designate
   type: puppet
-  groups: [designate]
+  groups: ['primary-controller', 'controller','primary-designate-node','designate']
   required_for: [deploy_end]
-  requires: [deploy_start, designate-haproxy,designate-repo, task-designate-db, designate-keystone]
+  requires: [deploy_start, designate-haproxy, designate-repo, task-designate-db, designate-keystone, task-designate-db-pool-man]
   parameters:
     puppet_manifest: puppet/manifests/designate.pp
     puppet_modules: puppet/modules:/etc/puppet/modules

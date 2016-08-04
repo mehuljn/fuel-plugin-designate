@@ -24,35 +24,36 @@
 #  (optional) Driver used for backend communication (fake, rpc, bind9, powerdns)
 #  Defaults to 'bind9'
 #
+# [*managed_resource_email*]
+#  (optional) Email to use for managed resources like domains created by the FloatingIP API
+#  Defaults to 'hostmaster@example.com'
+#
+# [*managed_resource_tenant_id*]
+#  (optional) Tenant ID to own all managed resources - like auto-created records etc.
+#  Defaults to '123456'
+#
 class designate::central (
-  $package_ensure       = present,
-  $central_package_name = undef,
-  $enabled              = true,
-  $service_ensure       = 'running',
-  $backend_driver       = 'bind9',
-) {
+  $package_ensure             = present,
+  $central_package_name       = undef,
+  $enabled                    = true,
+  $service_ensure             = 'running',
+  $backend_driver             = 'bind9',
+  $managed_resource_email     = 'hostmaster@example.com',
+  $managed_resource_tenant_id = '123456',
+) inherits designate {
   include ::designate::params
 
-  package { 'designate-central':
-    ensure => $package_ensure,
-    name   => pick($central_package_name, $::designate::params::central_package_name),
-    tag    => 'openstack',
-  }
-
-  Designate_config<||> ~> Service['designate-central']
-  Package['designate-central'] -> Designate_config<||>
-
-  service { 'designate-central':
-    ensure     => $service_ensure,
-    name       => $::designate::params::central_service_name,
-    enable     => $enabled,
-    hasstatus  => true,
-    hasrestart => true,
-    require    => Class['::designate::db'],
-    subscribe  => Exec['designate-dbsync']
-  }
-
   designate_config {
-    'service:central/backend_driver'         : value => $backend_driver;
+    'service:central/backend_driver'             : value => $backend_driver;
+    'service:central/managed_resource_email'     : value => $managed_resource_email;
+    'service:central/managed_resource_tenant_id' : value => $managed_resource_tenant_id;
+  }
+
+  designate::generic_service { 'central':
+    enabled        => $enabled,
+    manage_service => $service_ensure,
+    ensure_package => $package_ensure,
+    package_name   => pick($central_package_name, $::designate::params::central_package_name),
+    service_name   => $::designate::params::central_service_name,
   }
 }

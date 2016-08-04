@@ -6,3 +6,18 @@ attributes:
       generator: "password"
     user_password:
       generator: "password"
+    
+  designate_dns_backend_radio:
+    type: "radio"
+    weight: 40
+    value: "disabled"
+    label: "Designate DNS Backend"
+    values:
+      - data: "bind9"
+        label: "Enable Bind9"
+        description: "This option is to use bind9 as Designate DNS Backend"
+      - data: "powerdns"
+        label: "Enable PowerDNS"
+        description: "This option is to use powerdns as Designate DNS Backend"
+
+

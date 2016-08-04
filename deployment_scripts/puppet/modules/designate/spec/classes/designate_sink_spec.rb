@@ -16,13 +16,22 @@ describe 'designate::sink' do
         is_expected.to contain_service('designate-sink').with(
           :name      => platform_params[:sink_service_name],
           :ensure    => 'running',
-          :enable    => 'true'
+          :enable    => 'true',
+          :tag       => ['openstack', 'designate-service'],
         )
         is_expected.to contain_package('designate-sink').with(
           :name      => platform_params[:sink_package_name],
           :ensure    => 'present',
-          :tag       => 'openstack'
+          :tag       => ['openstack', 'designate-package'],
         )
+        is_expected.to contain_designate_config('service:sink/enabled_notification_handlers').with_ensure('absent')
+      end
+
+      context 'when using enabled_notification_handlers' do
+        before { params.merge!(:enabled_notification_handlers => ['nova_fixed','neutron_floatingip']) }
+        it 'configures designate-sink with enabled_notification_handlers' do
+          is_expected.to contain_designate_config('service:sink/enabled_notification_handlers').with_value(['nova_fixed,neutron_floatingip'])
+        end
       end
     end
   end

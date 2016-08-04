@@ -28,8 +28,10 @@ $rabbit_hosts               = split($amqp_hosts, ',')
 $db_host                    = pick($designate_hash['metadata']['db_host'], $database_vip)
 $db_user                    = pick($designate_hash['metadata']['db_user'], 'designate')
 $db_name                    = pick($designate_hash['metadata']['db_name'], 'designate')
+$db_name_pool_man           = pick($designate_hash['metadata']['db_name'], 'designate_pool_manager')
 $db_password                = pick($designate_hash['metadata']['db_password'], 'designate')
 $database_connection        = "mysql://${db_user}:${db_password}@${db_host}/${db_name}?charset=utf8&read_timeout=60"
+$database_connection_pool_man = "mysql://${db_user}:${db_password}@${db_host}/${db_name_pool_man}?charset=utf8&read_timeout=60"
 
 $designate_auth_strategy    = "keystone"
 $keystone_endpoint          = hiera('service_endpoint', $management_vip)
@@ -50,10 +52,12 @@ if $designate_hash['metadata']['enabled'] {
 
   class { 'designate::agent': }
 
-  class { 'designate::backend::bind9': }
-
   class { 'designate::db':
     database_connection => $database_connection,
+  }
+
+  class { 'designate::db_pool_man':
+    database_connection => $database_connection_pool_man,
   }
 
   class { 'designate::client': }
@@ -71,6 +75,16 @@ if $designate_hash['metadata']['enabled'] {
   class { 'designate::sink': }
 
   class { 'designate::central': }
+
+  class { 'designate::pool_manager': }
+
+  class { 'designate::mdns': }
+
+  include '::designate::dns'
+  class {'::designate::backend::bind9':
+         rndc_config_file => '',
+         rndc_key_file    => '',
+  }
 
   firewall { '207 designate-api' :
     dport   => '9001',
