@@ -11,22 +11,23 @@ This is Fuel Plugin for Designate used in Fuel Environment for deploying Designa
 git clone https://github.com/mehuljn/fuel-plugin-designate
 cd fuel-plugin-designate
 ```
-### Using the fuel plugin builder build the plugin 
+### Using fuel plugin builder build the final plugin 
 `fpb --build .` 
 
 __If the above commands gives errors it might require come additional rpmbuild or deb packages which need to be installed__
-### Once the Plugin is built ,use the below command to install the plugin in fuel
+### Once plugin build is completed ,install or import the plugin in fuel
 `fuel plugin --install <path to plugin rpm file>`
 
-### The plugin should now be available under plugins in Fuel UI
+### This newly built plugin should now be available under plugins tab in Fuel UI
 
-#### Once the deployment is completed ,for automatic integration please ensure that the new notification handler is used to replace the older neutron.py and base.py files
+#### Once above steps are completed ,for automatic neutron integration please ensure that the new notification handler is used and designate dashboard is installed.
 
 ## Designate Dashboard
 
 Integrate Designate Dashboard by Manually Installing on all Controllers
 https://github.com/openstack/designate-dashboard/tree/stable/liberty
-Ensure the change to designatedashboard/____init____.py for pbr version
+
+Ensure the change to designatedashboard/____init____.py for pbr version is completed
 
 
 ## Changes to Fuel Designate Plugin for MOS 8.0 
