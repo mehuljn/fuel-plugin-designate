@@ -20,7 +20,7 @@ __If the above commands gives errors it might require come additional rpmbuild o
 
 ### The plugin should now be available under plugins in Fuel UI
 
-### Once the deployment is completed ,for automatic integration please ensure that the new notification handler is used to replace the older neutron.py and base.py files
+#### Once the deployment is completed ,for automatic integration please ensure that the new notification handler is used to replace the older neutron.py and base.py files
 
 ## Designate Dashboard
 
