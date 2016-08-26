@@ -47,6 +47,7 @@ class designate::backend::bind9 (
     ensure  => present,
     path    => "${::dns::params::namedconf_path}.options",
     line    => 'recursion no;',
+    match   => '^recursion.*$',
     require => Class['::designate'],
   }
 
