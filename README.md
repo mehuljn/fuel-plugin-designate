@@ -6,6 +6,25 @@ This is Fuel Plugin for Designate used in Fuel Environment for deploying Designa
 
 ## How to Use the plugin
 
+### Edit the file /usr/share/fuel-mirror/ubuntu.yaml as follows
+```
+#Add the following after - xinetd
+- "xinetd"
+- "bind9"
+- "bind9utils"
+```
+
+### On Fuel Master node add puppet module theforeman-dns (for bind9 backend support) __internet connectivity would be required__
+```
+puppet module install theforeman-dns
+```
+
+### Install fuel-plugin-builder to build plugins
+```
+pip install fuel-plugin-builder
+(you may need to download python-pip as well)
+```
+
 ### Git clone the plugin on fuel master
 ```
 git clone https://github.com/mehuljn/fuel-plugin-designate
@@ -36,7 +55,7 @@ Ensure the change to designatedashboard/____init____.py for pbr version is compl
 2. Add predecessor for database (primary-database) in deployment_tasks.yaml
 3. Add predecessor for keystone (primary-controller) in deployment_tasks.yaml
 4. Add "installation for bind9" in designate-puppet in designate.pp
-5. Add bind9 and bin9utils in /usr/share/fuel-mirror/ubuntu.yaml  for creating mos and ubuntu mirrors
+5. Add bind9 and bind9utils in /usr/share/fuel-mirror/ubuntu.yaml  for creating mos and ubuntu mirrors
 6. Add theforeman-dns to puppet modules on fuel master
 7. Add manifests for Pool Manager and mDNS (missing in the original mos 7.0 plugin)
 8. Removed pre_build_hook as there are changes in puppet-designate modules as well which are not in github
